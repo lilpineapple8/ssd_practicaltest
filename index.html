@@ -1,5 +1,57 @@
 <!DOCTYPE html>
-<html>
-  <head><title>Hello World</title></head>
-  <body><h1>Welcome behind the proxy!</h1></body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Search App</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    #result { display: none; }
+  </style>
+</head>
+<body>
+  <div id="home">
+    <h2>Search Page</h2>
+    <form onsubmit="handleSearch(event)">
+      <input type="text" id="search" placeholder="Enter search term" required>
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <div id="result">
+    <h2>Result Page</h2>
+    <p id="term"></p>
+    <button onclick="goHome()">Go Back</button>
+  </div>
+
+  <script>
+    function isXSS(input) {
+      return /<[^>]*script|on\w+=|javascript:/i.test(input);
+    }
+
+    function isSQLi(input) {
+      return /('|--|;|\/\*|\*\/|\b(OR|AND|SELECT|INSERT|DELETE|UPDATE|DROP|UNION|WHERE|1=1)\b)/i.test(input);
+    }
+
+    function handleSearch(e) {
+      e.preventDefault();
+      const input = document.getElementById('search');
+      const term = input.value.trim();
+
+      if (isXSS(term) || isSQLi(term)) {
+        input.value = '';
+        return;
+      }
+
+      document.getElementById('term').innerText = `You searched for: ${term}`;
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+    }
+
+    function goHome() {
+      document.getElementById('search').value = '';
+      document.getElementById('home').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+    }
+  </script>
+</body>
 </html>
